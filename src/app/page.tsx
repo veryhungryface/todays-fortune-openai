@@ -22,6 +22,17 @@ const initialResult: FortuneResult = {
   closingJoke: "",
 };
 
+type FortuneCardKey = "summary" | "love" | "money" | "workStudy" | "luckyItem" | "avoid";
+
+const fortuneCards: Array<{ key: FortuneCardKey; title: string; emoji: string }> = [
+  { key: "summary", title: "오늘 총운", emoji: "🌤️" },
+  { key: "love", title: "연애운", emoji: "💘" },
+  { key: "money", title: "금전운", emoji: "💸" },
+  { key: "workStudy", title: "직장·학업운", emoji: "🧠" },
+  { key: "luckyItem", title: "행운 아이템", emoji: "🍀" },
+  { key: "avoid", title: "피해야 할 것", emoji: "🚧" },
+];
+
 export default function Home() {
   const [name, setName] = useState("");
   const [birthDate, setBirthDate] = useState("");
@@ -63,82 +74,111 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_#ffffff_0%,_#d5e8ff_28%,_#fce7ff_58%,_#fff4c2_100%)] p-5 md:p-10 text-zinc-900">
-      <div className="mx-auto max-w-5xl">
-        <section className="rounded-[2rem] border border-white/50 bg-white/35 p-6 shadow-[0_20px_60px_rgba(58,35,125,0.20)] backdrop-blur-xl md:p-10">
-          <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight">오늘의 운세 🔮</h1>
-          <p className="mt-3 text-sm md:text-base text-zinc-700">
+    <main className="app-shell min-h-screen px-4 pb-10 pt-6 text-slate-900 sm:px-6 lg:px-10 lg:pb-16 lg:pt-10">
+      <div className="mx-auto w-full max-w-6xl">
+        <section className="glass-panel hero-sheen reveal-fade rounded-[2rem] p-5 sm:p-8 lg:p-10">
+          <h1 className="font-display text-4xl font-black tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">오늘의 운세 🔮</h1>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-700 sm:text-base">
             밈 감성으로 보는 오늘의 흐름. 이름 + 생년월일만 넣으면 AI가 오늘의 총운을 재밌게 정리해줘요.
           </p>
 
-          <form onSubmit={onSubmit} className="mt-7 grid gap-4 md:grid-cols-3">
-            <label className="md:col-span-1">
-              <span className="mb-1 block text-sm font-semibold">이름 (필수)</span>
+          <form onSubmit={onSubmit} className="mt-7 grid gap-4 lg:grid-cols-12" aria-busy={loading}>
+            <label htmlFor="fortune-name" className="lg:col-span-4">
+              <span className="mb-2 block text-sm font-semibold text-slate-800">이름 (필수)</span>
               <input
+                id="fortune-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="예: 배실장"
-                className="w-full rounded-xl border border-white/70 bg-white/70 px-4 py-3 outline-none ring-0 placeholder:text-zinc-500 focus:border-violet-400"
+                autoComplete="name"
+                required
+                className="input-glass px-4 py-3 text-[15px] outline-none"
               />
             </label>
 
-            <label className="md:col-span-1">
-              <span className="mb-1 block text-sm font-semibold">생년월일 (필수)</span>
+            <label htmlFor="fortune-birth-date" className="lg:col-span-4">
+              <span className="mb-2 block text-sm font-semibold text-slate-800">생년월일 (필수)</span>
               <input
+                id="fortune-birth-date"
                 type="date"
                 value={birthDate}
                 onChange={(e) => setBirthDate(e.target.value)}
-                className="w-full rounded-xl border border-white/70 bg-white/70 px-4 py-3 outline-none focus:border-violet-400"
+                required
+                className="input-glass px-4 py-3 text-[15px] outline-none"
               />
             </label>
 
-            <label className="md:col-span-1">
-              <span className="mb-1 block text-sm font-semibold">MBTI (선택)</span>
+            <label htmlFor="fortune-mbti" className="lg:col-span-4">
+              <span className="mb-2 block text-sm font-semibold text-slate-800">MBTI (선택)</span>
               <input
+                id="fortune-mbti"
                 value={mbti}
                 maxLength={4}
                 onChange={(e) => setMbti(e.target.value.toUpperCase())}
                 placeholder="예: ENTP"
-                className="w-full rounded-xl border border-white/70 bg-white/70 px-4 py-3 outline-none placeholder:text-zinc-500 focus:border-violet-400"
+                autoCapitalize="characters"
+                className="input-glass px-4 py-3 text-[15px] uppercase outline-none"
               />
             </label>
 
-            <div className="md:col-span-3 mt-2 flex items-center gap-3">
+            <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center lg:col-span-12">
               <button
                 type="submit"
                 disabled={!canSubmit}
-                className="rounded-2xl bg-gradient-to-r from-indigo-600 to-fuchsia-500 px-5 py-3 text-white font-bold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-disabled={!canSubmit}
+                className="action-button inline-flex min-h-12 items-center justify-center px-5 py-3 text-base font-bold tracking-tight text-white"
               >
                 {loading ? "운세 뽑는 중..." : "오늘 운세 보기"}
               </button>
-              {error ? <p className="text-sm text-rose-700">{error}</p> : null}
+              <p
+                className={`min-h-5 text-sm ${error ? "font-medium text-rose-700" : "text-transparent"}`}
+                role={error ? "alert" : "status"}
+                aria-live="polite"
+              >
+                {error || "\u00A0"}
+              </p>
             </div>
           </form>
         </section>
 
-        <section className="mt-8 grid gap-4 md:grid-cols-2">
-          <Card title="오늘 총운" content={result.summary} emoji="🌤️" />
-          <Card title="연애운" content={result.love} emoji="💘" />
-          <Card title="금전운" content={result.money} emoji="💸" />
-          <Card title="직장·학업운" content={result.workStudy} emoji="🧠" />
-          <Card title="행운 아이템" content={result.luckyItem} emoji="🍀" />
-          <Card title="피해야 할 것" content={result.avoid} emoji="🚧" />
+        <section className="mt-6 grid gap-4 sm:mt-8 sm:grid-cols-2 xl:grid-cols-3" aria-live="polite">
+          {fortuneCards.map((card, index) => (
+            <Card
+              key={card.key}
+              title={card.title}
+              content={result[card.key]}
+              emoji={card.emoji}
+              animationDelay={index * 70}
+            />
+          ))}
         </section>
 
-        <section className="mt-4 rounded-3xl border border-white/60 bg-white/40 p-5 shadow-[0_10px_35px_rgba(48,39,117,.18)] backdrop-blur-xl">
-          <h2 className="font-extrabold text-xl">마무리 드립 🎤</h2>
-          <p className="mt-2 text-zinc-800 whitespace-pre-wrap">{result.closingJoke || "운세를 먼저 뽑아보면 오늘의 한 줄 드립이 뜹니다."}</p>
+        <section
+          className="glass-card reveal-fade mt-4 rounded-3xl p-5 sm:p-6"
+          style={{ animationDelay: `${fortuneCards.length * 70}ms` }}
+        >
+          <h2 className="font-display text-2xl font-bold tracking-tight text-slate-900">마무리 드립 🎤</h2>
+          <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-slate-800 sm:text-base">
+            {result.closingJoke || "운세를 먼저 뽑아보면 오늘의 한 줄 드립이 뜹니다."}
+          </p>
         </section>
       </div>
     </main>
   );
 }
 
-function Card({ title, content, emoji }: { title: string; content: string; emoji: string }) {
+function Card({ title, content, emoji, animationDelay }: { title: string; content: string; emoji: string; animationDelay: number }) {
   return (
-    <article className="rounded-3xl border border-white/60 bg-white/40 p-5 shadow-[0_10px_35px_rgba(48,39,117,.18)] backdrop-blur-xl">
-      <h2 className="font-extrabold text-xl">{emoji} {title}</h2>
-      <p className="mt-2 text-zinc-800 whitespace-pre-wrap min-h-16">{content || "운세 결과가 여기에 표시됩니다."}</p>
+    <article className="glass-card reveal-fade rounded-3xl p-5 sm:p-6" style={{ animationDelay: `${animationDelay}ms` }}>
+      <h2 className="font-display text-2xl font-bold tracking-tight text-slate-900">
+        <span className="mr-2" aria-hidden="true">
+          {emoji}
+        </span>
+        {title}
+      </h2>
+      <p className="mt-3 min-h-20 whitespace-pre-wrap text-sm leading-relaxed text-slate-800 sm:text-base">
+        {content || "운세 결과가 여기에 표시됩니다."}
+      </p>
     </article>
   );
 }
